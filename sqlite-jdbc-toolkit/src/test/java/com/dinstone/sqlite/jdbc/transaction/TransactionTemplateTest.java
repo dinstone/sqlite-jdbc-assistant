@@ -30,7 +30,7 @@ public class TransactionTemplateTest {
 	public static void main(String[] args) {
 		SqliteDataSourceConfig config = new SqliteDataSourceConfig();
 		config.getSqLiteConfig().setJournalMode(JournalMode.WAL);
-		config.getSqLiteConfig().setBusyTimeout("10000");
+		config.getSqLiteConfig().setBusyTimeout(10000);
 		config.setUrl("jdbc:sqlite:data/jdbc.db");
 		SqliteJdbcDataSource dataSource = new SqliteJdbcDataSource(config);
 

@@ -27,12 +27,7 @@ public class SqliteJdbcDataSourceTest {
 
 	@Test
 	public void testGetConnection() throws SQLException {
-		SqliteDataSourceConfig config = new SqliteDataSourceConfig();
-		config.getSqLiteConfig().setJournalMode(JournalMode.WAL);
-		config.getSqLiteConfig().setBusyTimeout("10000");
-		config.setUrl("jdbc:sqlite:data/jdbc-datasource.db");
-
-		SqliteJdbcDataSource dataSource = new SqliteJdbcDataSource(config);
+		final SqliteJdbcDataSource dataSource = getDataSource();
 		try {
 			long startTime = System.currentTimeMillis();
 			int measurementTime = 10000;
@@ -52,12 +47,7 @@ public class SqliteJdbcDataSourceTest {
 
 	@Test
 	public void testWithTransaction() throws Exception {
-		SqliteDataSourceConfig config = new SqliteDataSourceConfig();
-		config.getSqLiteConfig().setJournalMode(JournalMode.WAL);
-		config.getSqLiteConfig().setBusyTimeout("10000");
-		config.setUrl("jdbc:sqlite:data/jdbc-datasource.db");
-
-		final SqliteJdbcDataSource dataSource = new SqliteJdbcDataSource(config);
+		final SqliteJdbcDataSource dataSource = getDataSource();
 		try {
 			initDb(dataSource.getConnection());
 
@@ -98,15 +88,18 @@ public class SqliteJdbcDataSourceTest {
 		}
 	}
 
-	@Test
-	public void testWithoutTransaction() throws Exception {
+	private SqliteJdbcDataSource getDataSource() {
 		SqliteDataSourceConfig config = new SqliteDataSourceConfig();
 		config.getSqLiteConfig().setJournalMode(JournalMode.WAL);
-		config.getSqLiteConfig().setBusyTimeout("10000");
-		config.setMaxSize(10);
+		config.getSqLiteConfig().setBusyTimeout(10000);
 		config.setUrl("jdbc:sqlite:data/jdbc-datasource.db");
 
-		final SqliteJdbcDataSource dataSource = new SqliteJdbcDataSource(config);
+		return new SqliteJdbcDataSource(config);
+	}
+
+	@Test
+	public void testWithoutTransaction() throws Exception {
+		final SqliteJdbcDataSource dataSource = getDataSource();
 		try {
 			initDb(dataSource.getConnection());
 
