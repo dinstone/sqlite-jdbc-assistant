@@ -21,6 +21,7 @@ import java.sql.Statement;
 import java.util.concurrent.CountDownLatch;
 
 import org.junit.Test;
+import org.sqlite.SQLiteConfig.HexKeyMode;
 import org.sqlite.SQLiteConfig.JournalMode;
 
 public class SqliteJdbcDataSourceTest {
@@ -91,7 +92,9 @@ public class SqliteJdbcDataSourceTest {
 	private SqliteJdbcDataSource getDataSource() {
 		SqliteDataSourceConfig config = new SqliteDataSourceConfig();
 		config.getSqLiteConfig().setJournalMode(JournalMode.WAL);
+		config.getSqLiteConfig().setJounalSizeLimit(1048567);
 		config.getSqLiteConfig().setBusyTimeout(10000);
+		config.getSqLiteConfig().setHexKeyMode(HexKeyMode.SSE);
 		config.setUrl("jdbc:sqlite:data/jdbc-datasource.db");
 
 		return new SqliteJdbcDataSource(config);
