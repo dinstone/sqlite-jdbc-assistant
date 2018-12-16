@@ -17,6 +17,6 @@ package com.dinstone.sqlite.jdbc.transaction;
 
 public interface TransactionCallback<T> {
 
-	T doInTransaction(TransactionStatus status);
+	T doInTransaction(TransactionStatus status) throws TransactionException;
 
 }
