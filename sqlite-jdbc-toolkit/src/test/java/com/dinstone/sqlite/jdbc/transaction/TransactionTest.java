@@ -44,6 +44,7 @@ public class TransactionTest {
 		SqliteDataSourceConfig config = new SqliteDataSourceConfig();
 		config.getSqLiteConfig().setJournalMode(JournalMode.WAL);
 		config.getSqLiteConfig().setBusyTimeout(10000);
+		// config.getSqLiteConfig().setTransactionMode(TransactionMode.IMMEDIATE);
 		config.setUrl("jdbc:sqlite:data/tsdb.db");
 		SqliteJdbcDataSource dataSource = new SqliteJdbcDataSource(config);
 
