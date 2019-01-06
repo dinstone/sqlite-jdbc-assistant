@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.sqlite.SQLiteConfig.JournalMode;
+import org.sqlite.SQLiteConfig.TransactionMode;
 
 import com.dinstone.loghub.Logger;
 import com.dinstone.loghub.LoggerFactory;
@@ -43,8 +44,9 @@ public class TransactionTest {
 	public static void main(String[] args) {
 		SqliteDataSourceConfig config = new SqliteDataSourceConfig();
 		config.getSqLiteConfig().setJournalMode(JournalMode.WAL);
-		config.getSqLiteConfig().setBusyTimeout(10000);
-		// config.getSqLiteConfig().setTransactionMode(TransactionMode.IMMEDIATE);
+		config.getSqLiteConfig().setBusyTimeout(3000);
+		// config.getSqLiteConfig().setReadUncommited(true);
+		config.getSqLiteConfig().setTransactionMode(TransactionMode.IMMEDIATE);
 		config.setUrl("jdbc:sqlite:data/tsdb.db");
 		SqliteJdbcDataSource dataSource = new SqliteJdbcDataSource(config);
 
@@ -69,6 +71,15 @@ public class TransactionTest {
 		});
 		tbr.start();
 
+		Thread tcr = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				transC(jdbcTemplate, transTemplate);
+			}
+		});
+		tcr.start();
+
 		try {
 			System.in.read();
 		} catch (IOException e) {
@@ -86,23 +97,21 @@ public class TransactionTest {
 						+ " " + rs.getTimestamp("createTime");
 			}
 		});
-		for (String line : sList) {
-			logger.info("row is {}", line);
-		}
+		logger.info("row is {}", sList.size());
 	}
 
 	protected static void update(JdbcTemplate jdbcTemplate) throws SQLException {
 		int s = jdbcTemplate.update("update tb_user set sex=sex-1 where id=1");
-		logger.info("update size is " + s);
+		logger.info("update size is {}", s);
 	}
 
 	protected static void insert(JdbcTemplate jdbcTemplate) throws SQLException {
 		int a = new Random().nextInt(1000);
 		int s = jdbcTemplate.update("insert into tb_user(name,age) values('user-" + a + "'," + a + ")");
-		logger.info("insert size is " + s);
+		logger.info("insert size is {}", s);
 	}
 
-	private static void transA(final JdbcTemplate jdbcTemplate, TransactionTemplate transTemplate) {
+	protected static void transA(final JdbcTemplate jdbcTemplate, TransactionTemplate transTemplate) {
 
 		transTemplate.execute(new TransactionCallback<Void>() {
 
@@ -111,6 +120,9 @@ public class TransactionTest {
 				try {
 					logger.info("trans A first query");
 					query(jdbcTemplate);
+
+					logger.info("trans A first insert");
+					insert(jdbcTemplate);
 
 					logger.info("trans A second qurey");
 					query(jdbcTemplate);
@@ -132,7 +144,7 @@ public class TransactionTest {
 		}
 	}
 
-	private static void transB(final JdbcTemplate jdbcTemplate, TransactionTemplate transTemplate) {
+	protected static void transB(final JdbcTemplate jdbcTemplate, TransactionTemplate transTemplate) {
 
 		transTemplate.execute(new TransactionCallback<Void>() {
 
@@ -156,6 +168,22 @@ public class TransactionTest {
 				return null;
 			}
 		});
+
+	}
+
+	protected static void transC(final JdbcTemplate jdbcTemplate, TransactionTemplate transTemplate) {
+		try {
+			logger.info("trans C first query");
+			query(jdbcTemplate);
+
+			logger.info("trans C second qurey");
+			query(jdbcTemplate);
+
+			logger.info("trans C third qurey");
+			query(jdbcTemplate);
+		} catch (Exception e) {
+			throw new TransactionException("execute error", e);
+		}
 
 	}
 

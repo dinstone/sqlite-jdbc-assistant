@@ -32,7 +32,8 @@ public class DataSourceHelper {
 	public static Connection getConnection(DataSource dataSource) throws SQLException {
 		ConnectionHolder conHolder = TransactionHelper.getConnectionHolder(dataSource);
 		if (conHolder == null) {
-			conHolder = new ConnectionHolder(dataSource.getConnection());
+			return dataSource.getConnection();
+			// conHolder = new ConnectionHolder(dataSource.getConnection());
 		}
 		return conHolder.getConnection();
 	}

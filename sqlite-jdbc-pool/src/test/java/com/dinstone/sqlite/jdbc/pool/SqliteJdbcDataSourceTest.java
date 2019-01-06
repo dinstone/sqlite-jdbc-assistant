@@ -96,6 +96,7 @@ public class SqliteJdbcDataSourceTest {
 		config.getSqLiteConfig().setBusyTimeout(10000);
 		config.getSqLiteConfig().setHexKeyMode(HexKeyMode.SSE);
 		config.setUrl("jdbc:sqlite:data/jdbc-datasource.db");
+		config.setMaxSize(10);
 
 		return new SqliteJdbcDataSource(config);
 	}
