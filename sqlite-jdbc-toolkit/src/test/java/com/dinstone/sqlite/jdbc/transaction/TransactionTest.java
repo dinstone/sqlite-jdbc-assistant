@@ -57,7 +57,10 @@ public class TransactionTest {
 
 			@Override
 			public void run() {
-				transA(jdbcTemplate, transTemplate);
+				for (int i = 0; i < 10; i++) {
+					transA(jdbcTemplate, transTemplate);
+					System.out.println("TF[A] : "+i);
+				}
 			}
 		});
 		tar.start();
@@ -66,7 +69,10 @@ public class TransactionTest {
 
 			@Override
 			public void run() {
-				transB(jdbcTemplate, transTemplate);
+				for (int i = 0; i < 10; i++) {
+					transB(jdbcTemplate, transTemplate);
+					System.out.println("TF[B] : "+i);
+				}
 			}
 		});
 		tbr.start();
@@ -75,7 +81,10 @@ public class TransactionTest {
 
 			@Override
 			public void run() {
-				transC(jdbcTemplate, transTemplate);
+				for (int i = 0; i < 10; i++) {
+					transC(jdbcTemplate, transTemplate);
+					System.out.println("TF[C] : "+i);
+				}
 			}
 		});
 		tcr.start();
