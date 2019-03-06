@@ -18,15 +18,23 @@ package com.dinstone.sqlite.jdbc.template;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
 
+import com.dinstone.loghub.Logger;
+import com.dinstone.loghub.LoggerFactory;
 import com.dinstone.sqlite.jdbc.support.DataSourceHelper;
 
 public class JdbcTemplate {
+
+	private static final Logger logger = LoggerFactory.getLogger(JdbcTemplate.class);
+
+	/** If this variable is false, we will throw exceptions on SQL warnings */
+	private boolean ignoreWarnings = true;
 
 	private DataSource dataSource;
 
@@ -34,12 +42,49 @@ public class JdbcTemplate {
 		this.dataSource = dataSource;
 	}
 
+	public boolean isIgnoreWarnings() {
+		return ignoreWarnings;
+	}
+
+	public void setIgnoreWarnings(boolean ignoreWarnings) {
+		this.ignoreWarnings = ignoreWarnings;
+	}
+
 	public void execute(final String sql) throws SQLException {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing SQL statement [" + sql + "]");
+		}
+
 		Connection connection = DataSourceHelper.getConnection(dataSource);
 		try (Statement statement = connection.createStatement()) {
 			statement.execute(sql);
+			handleWarnings(statement);
 		} finally {
 			DataSourceHelper.releaseConnection(connection, dataSource);
+		}
+	}
+
+	private void handleWarnings(Statement stmt) throws SQLException {
+		if (isIgnoreWarnings()) {
+			if (logger.isDebugEnabled()) {
+				SQLWarning warningToLog = stmt.getWarnings();
+				while (warningToLog != null) {
+					logger.debug("SQLWarning ignored: SQL state '" + warningToLog.getSQLState() + "', error code '"
+							+ warningToLog.getErrorCode() + "', message [" + warningToLog.getMessage() + "]");
+					warningToLog = warningToLog.getNextWarning();
+				}
+			}
+		} else {
+			handleWarnings(stmt.getWarnings());
+		}
+	}
+
+	/**
+	 * Throw an SQLException if encountering an actual warning.
+	 */
+	protected void handleWarnings(SQLWarning warning) throws SQLException {
+		if (warning != null) {
+			throw new SQLException("SQL Warning Exception", warning);
 		}
 	}
 
