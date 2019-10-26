@@ -39,161 +39,161 @@ import com.dinstone.sqlite.jdbc.template.RowMapper;
  */
 public class TransactionTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(TransactionTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionTest.class);
 
-	public static void main(String[] args) {
-		SqliteDataSourceConfig config = new SqliteDataSourceConfig();
-		config.getSqLiteConfig().setJournalMode(JournalMode.WAL);
-		config.getSqLiteConfig().setBusyTimeout(3000);
-		// config.getSqLiteConfig().setReadUncommited(true);
-		config.getSqLiteConfig().setTransactionMode(TransactionMode.IMMEDIATE);
-		config.setUrl("jdbc:sqlite:data/tsdb.db");
-		SqliteJdbcDataSource dataSource = new SqliteJdbcDataSource(config);
+    public static void main(String[] args) {
+        SqliteDataSourceConfig config = new SqliteDataSourceConfig();
+        config.getSqLiteConfig().setJournalMode(JournalMode.WAL);
+        config.getSqLiteConfig().setBusyTimeout(3000);
+        // config.getSqLiteConfig().setReadUncommited(true);
+        config.getSqLiteConfig().setTransactionMode(TransactionMode.IMMEDIATE);
+        config.setUrl("jdbc:sqlite:data/tsdb.db");
+        SqliteJdbcDataSource dataSource = new SqliteJdbcDataSource(config);
 
-		final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		final TransactionTemplate transTemplate = new TransactionTemplate(new TransactionManager(dataSource));
+        final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        final TransactionTemplate transTemplate = new TransactionTemplate(new TransactionManager(dataSource));
 
-		Thread tar = new Thread(new Runnable() {
+        Thread tar = new Thread(new Runnable() {
 
-			@Override
-			public void run() {
-				for (int i = 0; i < 10; i++) {
-					transA(jdbcTemplate, transTemplate);
-					System.out.println("TF[A] : "+i);
-				}
-			}
-		});
-		tar.start();
+            @Override
+            public void run() {
+                for (int i = 0; i < 10; i++) {
+                    transA(jdbcTemplate, transTemplate);
+                    System.out.println("TF[A] : " + i);
+                }
+            }
+        });
+        tar.start();
 
-		Thread tbr = new Thread(new Runnable() {
+        Thread tbr = new Thread(new Runnable() {
 
-			@Override
-			public void run() {
-				for (int i = 0; i < 10; i++) {
-					transB(jdbcTemplate, transTemplate);
-					System.out.println("TF[B] : "+i);
-				}
-			}
-		});
-		tbr.start();
+            @Override
+            public void run() {
+                for (int i = 0; i < 10; i++) {
+                    transB(jdbcTemplate, transTemplate);
+                    System.out.println("TF[B] : " + i);
+                }
+            }
+        });
+        tbr.start();
 
-		Thread tcr = new Thread(new Runnable() {
+        Thread tcr = new Thread(new Runnable() {
 
-			@Override
-			public void run() {
-				for (int i = 0; i < 10; i++) {
-					transC(jdbcTemplate, transTemplate);
-					System.out.println("TF[C] : "+i);
-				}
-			}
-		});
-		tcr.start();
+            @Override
+            public void run() {
+                for (int i = 0; i < 10; i++) {
+                    transC(jdbcTemplate, transTemplate);
+                    System.out.println("TF[C] : " + i);
+                }
+            }
+        });
+        tcr.start();
 
-		try {
-			System.in.read();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        try {
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-		dataSource.dispose();
-	}
+        dataSource.dispose();
+    }
 
-	protected static void query(final JdbcTemplate jdbcTemplate) throws SQLException {
-		List<String> sList = jdbcTemplate.query("select * from tb_user", new RowMapper<String>() {
-			@Override
-			public String mapRow(ResultSet rs, int index) throws SQLException {
-				return rs.getInt("id") + " " + rs.getString("name") + " " + rs.getInt("age") + " " + rs.getInt("sex")
-						+ " " + rs.getTimestamp("createTime");
-			}
-		});
-		logger.info("row is {}", sList.size());
-	}
+    protected static void query(final JdbcTemplate jdbcTemplate) throws SQLException {
+        List<String> sList = jdbcTemplate.query("select * from tb_user", new RowMapper<String>() {
+            @Override
+            public String mapRow(ResultSet rs, int index) throws SQLException {
+                return rs.getInt("id") + " " + rs.getString("name") + " " + rs.getInt("age") + " " + rs.getInt("sex")
+                        + " " + rs.getTimestamp("createTime");
+            }
+        });
+        logger.info("row is {}", sList.size());
+    }
 
-	protected static void update(JdbcTemplate jdbcTemplate) throws SQLException {
-		int s = jdbcTemplate.update("update tb_user set sex=sex-1 where id=1");
-		logger.info("update size is {}", s);
-	}
+    protected static void update(JdbcTemplate jdbcTemplate) throws SQLException {
+        int s = jdbcTemplate.update("update tb_user set sex=sex-1 where id=1");
+        logger.info("update size is {}", s);
+    }
 
-	protected static void insert(JdbcTemplate jdbcTemplate) throws SQLException {
-		int a = new Random().nextInt(1000);
-		int s = jdbcTemplate.update("insert into tb_user(name,age) values('user-" + a + "'," + a + ")");
-		logger.info("insert size is {}", s);
-	}
+    protected static void insert(JdbcTemplate jdbcTemplate) throws SQLException {
+        int a = new Random().nextInt(1000);
+        int s = jdbcTemplate.update("insert into tb_user(name,age) values('user-" + a + "'," + a + ")");
+        logger.info("insert size is {}", s);
+    }
 
-	protected static void transA(final JdbcTemplate jdbcTemplate, TransactionTemplate transTemplate) {
+    protected static void transA(final JdbcTemplate jdbcTemplate, TransactionTemplate transTemplate) {
 
-		transTemplate.execute(new TransactionCallback<Void>() {
+        transTemplate.execute(new TransactionCallback<Void>() {
 
-			@Override
-			public Void doInTransaction(TransactionStatus status) {
-				try {
-					logger.info("trans A first query");
-					query(jdbcTemplate);
+            @Override
+            public Void doInTransaction(TransactionStatus status) {
+                try {
+                    logger.info("trans A first query");
+                    query(jdbcTemplate);
 
-					logger.info("trans A first insert");
-					insert(jdbcTemplate);
+                    logger.info("trans A first insert");
+                    insert(jdbcTemplate);
 
-					logger.info("trans A second qurey");
-					query(jdbcTemplate);
+                    logger.info("trans A second qurey");
+                    query(jdbcTemplate);
 
-					logger.info("trans A third qurey");
-					query(jdbcTemplate);
-				} catch (Exception e) {
-					throw new TransactionException("execute error", e);
-				}
-				return null;
-			}
-		});
+                    logger.info("trans A third qurey");
+                    query(jdbcTemplate);
+                } catch (Exception e) {
+                    throw new TransactionException("execute error", e);
+                }
+                return null;
+            }
+        });
 
-		logger.info("out trans A qurey");
-		try {
-			query(jdbcTemplate);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
+        logger.info("out trans A qurey");
+        try {
+            query(jdbcTemplate);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-	protected static void transB(final JdbcTemplate jdbcTemplate, TransactionTemplate transTemplate) {
+    protected static void transB(final JdbcTemplate jdbcTemplate, TransactionTemplate transTemplate) {
 
-		transTemplate.execute(new TransactionCallback<Void>() {
+        transTemplate.execute(new TransactionCallback<Void>() {
 
-			@Override
-			public Void doInTransaction(TransactionStatus status) {
-				try {
-					logger.info("trans B first update");
-					update(jdbcTemplate);
+            @Override
+            public Void doInTransaction(TransactionStatus status) {
+                try {
+                    logger.info("trans B first update");
+                    update(jdbcTemplate);
 
-					logger.info("trans B first qurey");
-					query(jdbcTemplate);
+                    logger.info("trans B first qurey");
+                    query(jdbcTemplate);
 
-					logger.info("trans B first insert");
-					insert(jdbcTemplate);
+                    logger.info("trans B first insert");
+                    insert(jdbcTemplate);
 
-					logger.info("trans B second qurey");
-					query(jdbcTemplate);
-				} catch (Exception e) {
-					throw new TransactionException("execute error", e);
-				}
-				return null;
-			}
-		});
+                    logger.info("trans B second qurey");
+                    query(jdbcTemplate);
+                } catch (Exception e) {
+                    throw new TransactionException("execute error", e);
+                }
+                return null;
+            }
+        });
 
-	}
+    }
 
-	protected static void transC(final JdbcTemplate jdbcTemplate, TransactionTemplate transTemplate) {
-		try {
-			logger.info("trans C first query");
-			query(jdbcTemplate);
+    protected static void transC(final JdbcTemplate jdbcTemplate, TransactionTemplate transTemplate) {
+        try {
+            logger.info("trans C first query");
+            query(jdbcTemplate);
 
-			logger.info("trans C second qurey");
-			query(jdbcTemplate);
+            logger.info("trans C second qurey");
+            query(jdbcTemplate);
 
-			logger.info("trans C third qurey");
-			query(jdbcTemplate);
-		} catch (Exception e) {
-			throw new TransactionException("execute error", e);
-		}
+            logger.info("trans C third qurey");
+            query(jdbcTemplate);
+        } catch (Exception e) {
+            throw new TransactionException("execute error", e);
+        }
 
-	}
+    }
 
 }

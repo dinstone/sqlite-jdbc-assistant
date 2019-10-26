@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.dinstone.sqlite.jdbc.transaction;
 
 import java.sql.ResultSet;
@@ -23,104 +24,142 @@ import com.dinstone.loghub.Logger;
 import com.dinstone.loghub.LoggerFactory;
 import com.dinstone.sqlite.jdbc.template.JdbcTemplate;
 import com.dinstone.sqlite.jdbc.template.RowMapper;
-import com.dinstone.sqlite.jdbc.transaction.TransactionCallback;
-import com.dinstone.sqlite.jdbc.transaction.TransactionStatus;
-import com.dinstone.sqlite.jdbc.transaction.TransactionTemplate;
 
 public class Service {
 
-	private static Logger logger = LoggerFactory.getLogger(TransactionTemplate.class);
+    private static Logger logger = LoggerFactory.getLogger(TransactionTemplate.class);
 
-	private JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
-	private TransactionTemplate transactionTemplate;
+    private TransactionTemplate transactionTemplate;
 
-	public Service(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
-		this.jdbcTemplate = jdbcTemplate;
-		this.transactionTemplate = transactionTemplate;
-	}
+    public Service(JdbcTemplate jdbcTemplate, TransactionTemplate transactionTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.transactionTemplate = transactionTemplate;
+    }
 
-	public void action() throws SQLException {
-		init();
+    public void action() throws SQLException {
+        // init();
 
-		transactionTemplate.execute(new TransactionCallback<Void>() {
+        transactionTemplate.execute(new TransactionCallback<Void>() {
 
-			@Override
-			public Void doInTransaction(TransactionStatus status) {
-				try {
-					doAction();
-				} catch (Exception e) {
-					throw new RuntimeException("execute error", e);
-				}
-				return null;
-			}
-		});
+            @Override
+            public Void doInTransaction(TransactionStatus status) {
+                try {
+                    doAction();
+                } catch (Exception e) {
+                    throw new RuntimeException("execute error", e);
+                }
+                return null;
+            }
+        });
 
-		clear();
-	}
+        clear();
+    }
 
-	public void init() throws SQLException {
-		jdbcTemplate.update("drop table if exists test;");
-		jdbcTemplate.update("create table test(name varchar(20));");
-		jdbcTemplate.update("insert into test values('dinstone');");
-		List<String> sList = jdbcTemplate.query("select name from test", new RowMapper<String>() {
-			@Override
-			public String mapRow(ResultSet rs, int index) throws SQLException {
-				return rs.getString("name");
-			}
-		});
-		logger.info("name is {}", sList.get(0));
+    public void init() throws SQLException {
+        jdbcTemplate.update("drop table if exists test;");
+        jdbcTemplate.update("create table test(name varchar(20));");
+        jdbcTemplate.update("insert into test values('dinstone');");
+        List<String> sList = jdbcTemplate.query("select name from test", new RowMapper<String>() {
 
-	}
+            @Override
+            public String mapRow(ResultSet rs, int index) throws SQLException {
+                return rs.getString("name");
+            }
+        });
+        logger.info("name is {}", sList.get(0));
 
-	public void doAction() throws SQLException {
-		jdbcTemplate.update("insert into test values('sqliteHelper test');");
-		List<String> sList = jdbcTemplate.query("select name from test", new RowMapper<String>() {
-			@Override
-			public String mapRow(ResultSet rs, int index) throws SQLException {
-				return rs.getString("name");
-			}
-		});
-		logger.info("list size is {}", sList.size());
+    }
 
-		doAction1();
-	}
+    private void doAction() throws SQLException {
+        jdbcTemplate.update("insert into test values('sqliteHelper test');");
+        List<String> sList = jdbcTemplate.query("select name from test", new RowMapper<String>() {
 
-	private void doAction1() {
-		transactionTemplate.execute(new TransactionCallback<Void>() {
+            @Override
+            public String mapRow(ResultSet rs, int index) throws SQLException {
+                return rs.getString("name");
+            }
+        });
+        logger.info("list size is {}", sList.size());
 
-			@Override
-			public Void doInTransaction(TransactionStatus status) {
-				try {
-					doAction2();
-				} catch (Exception e) {
-					throw new RuntimeException("execute error", e);
-				}
-				return null;
-			}
+        doAction1();
+    }
 
-		});
-	}
+    private void doAction1() {
+        transactionTemplate.execute(new TransactionCallback<Void>() {
 
-	private void doAction2() throws SQLException {
-		jdbcTemplate.update("insert into test values('sqliteHelper test');");
-		List<String> sList = jdbcTemplate.query("select name from test", new RowMapper<String>() {
-			@Override
-			public String mapRow(ResultSet rs, int index) throws SQLException {
-				return rs.getString("name");
-			}
-		});
-		logger.info("list size is {}", sList.size());
-	}
+            @Override
+            public Void doInTransaction(TransactionStatus status) {
+                try {
+                    doAction2();
+                } catch (Exception e) {
+                    throw new RuntimeException("execute error", e);
+                }
+                return null;
+            }
 
-	public void clear() throws SQLException {
-		jdbcTemplate.update("insert into test values('sqliteHelper test');");
-		List<String> sList = jdbcTemplate.query("select name from test", new RowMapper<String>() {
-			@Override
-			public String mapRow(ResultSet rs, int index) throws SQLException {
-				return rs.getString("name");
-			}
-		});
-		logger.info("list size is {}", sList.size());
-	}
+        });
+    }
+
+    private void doAction2() throws SQLException {
+        jdbcTemplate.update("insert into test values('sqliteHelper test');");
+        List<String> sList = jdbcTemplate.query("select name from test", new RowMapper<String>() {
+
+            @Override
+            public String mapRow(ResultSet rs, int index) throws SQLException {
+                return rs.getString("name");
+            }
+        });
+        logger.info("list size is {}", sList.size());
+    }
+
+    public void clear() throws SQLException {
+        jdbcTemplate.update("insert into test values('sqliteHelper test');");
+        List<String> sList = jdbcTemplate.query("select name from test", new RowMapper<String>() {
+
+            @Override
+            public String mapRow(ResultSet rs, int index) throws SQLException {
+                return rs.getString("name");
+            }
+        });
+        logger.info("list size is {}", sList.size());
+    }
+
+    public void insert() throws SQLException {
+        transactionTemplate.execute(new TransactionCallback<Void>() {
+
+            @Override
+            public Void doInTransaction(TransactionStatus status) {
+                try {
+                    for (int i = 0; i < 10; i++) {
+                        jdbcTemplate.update("insert into test values('" + i + "')");
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("execute error", e);
+                }
+                return null;
+            }
+        });
+    }
+
+    public void query() throws SQLException {
+        List<String> sList = jdbcTemplate.query("select name from test", new RowMapper<String>() {
+
+            @Override
+            public String mapRow(ResultSet rs, int index) throws SQLException {
+                return rs.getString("name");
+            }
+        });
+        logger.info("query 1 list size is {}", sList.size());
+
+        sList = jdbcTemplate.query("select name from test", new RowMapper<String>() {
+
+            @Override
+            public String mapRow(ResultSet rs, int index) throws SQLException {
+                return rs.getString("name");
+            }
+        });
+        logger.info("query 2 list size is {}", sList.size());
+    }
 }
