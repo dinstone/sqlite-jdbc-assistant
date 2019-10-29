@@ -27,66 +27,67 @@ import org.sqlite.javax.SQLiteConnectionPoolDataSource;
 
 public class SqliteJdbcDataSource implements DataSource {
 
-	private SQLiteConnectionPoolDataSource pooledDataSource;
+    private SQLiteConnectionPoolDataSource pooledDataSource;
 
-	private ConnectionPoolManager connectionPool;
+    private ConnectionPoolManager connectionPool;
 
-	public SqliteJdbcDataSource(SqliteDataSourceConfig config) {
-		pooledDataSource = new SQLiteConnectionPoolDataSource(config.getSqLiteConfig());
-		pooledDataSource.setUrl(config.getUrl());
-		connectionPool = new ConnectionPoolManager(pooledDataSource, config.getMaxSize(), config.getMaxWait());
-	}
+    public SqliteJdbcDataSource(SqliteDataSourceConfig config) {
+        pooledDataSource = new SQLiteConnectionPoolDataSource(config.getSqLiteConfig());
+        pooledDataSource.setUrl(config.getDatabaseUrl());
+        connectionPool = new ConnectionPoolManager(pooledDataSource, config.getMaxConnetionSize(),
+                config.getMaxWaitTimeout());
+    }
 
-	@Override
-	public PrintWriter getLogWriter() throws SQLException {
-		return pooledDataSource.getLogWriter();
-	}
+    @Override
+    public PrintWriter getLogWriter() throws SQLException {
+        return pooledDataSource.getLogWriter();
+    }
 
-	@Override
-	public void setLogWriter(PrintWriter out) throws SQLException {
-		pooledDataSource.setLogWriter(out);
-	}
+    @Override
+    public void setLogWriter(PrintWriter out) throws SQLException {
+        pooledDataSource.setLogWriter(out);
+    }
 
-	@Override
-	public void setLoginTimeout(int seconds) throws SQLException {
-		pooledDataSource.setLoginTimeout(seconds);
-	}
+    @Override
+    public void setLoginTimeout(int seconds) throws SQLException {
+        pooledDataSource.setLoginTimeout(seconds);
+    }
 
-	@Override
-	public int getLoginTimeout() throws SQLException {
-		return pooledDataSource.getLoginTimeout();
-	}
+    @Override
+    public int getLoginTimeout() throws SQLException {
+        return pooledDataSource.getLoginTimeout();
+    }
 
-	@Override
-	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		return pooledDataSource.getParentLogger();
-	}
+    @Override
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        return pooledDataSource.getParentLogger();
+    }
 
-	@Override
-	public <T> T unwrap(Class<T> iface) throws SQLException {
-		return iface.cast(this);
-	}
+    @Override
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return iface.cast(this);
+    }
 
-	@Override
-	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		return iface.isInstance(this);
-	}
+    @Override
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return iface.isInstance(this);
+    }
 
-	@Override
-	public Connection getConnection() throws SQLException {
-		return connectionPool.getConnection();
-	}
+    @Override
+    public Connection getConnection() throws SQLException {
+        return connectionPool.getConnection();
+    }
 
-	@Override
-	public Connection getConnection(String username, String password) throws SQLException {
-		return connectionPool.getConnection(username, password);
-	}
+    @Override
+    public Connection getConnection(String username, String password) throws SQLException {
+        return connectionPool.getConnection(username, password);
+    }
 
-	public synchronized void dispose() {
-		try {
-			connectionPool.dispose();
-		} catch (SQLException e) {
-			// ignore
-		}
-	}
+    public synchronized void dispose() {
+        try {
+            connectionPool.dispose();
+        } catch (SQLException e) {
+            // ignore
+        }
+    }
 }

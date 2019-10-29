@@ -20,69 +20,69 @@ import org.sqlite.SQLiteConfig;
 
 public class SqliteDataSourceConfig {
 
-	/**
-	 * use memory database in default
-	 */
-	private String url = JDBC.PREFIX;
+    /**
+     * use memory database in default
+     */
+    private String databaseUrl = JDBC.PREFIX;
 
-	/**
-	 * the name of the current database
-	 */
-	private String databaseName = "";
+    /**
+     * the name of the current database
+     */
+    private String databaseName = "";
 
-	/**
-	 * sqlite config.
-	 */
-	private SQLiteConfig sqLiteConfig = new SQLiteConfig();
+    /**
+     * sqlite config.
+     */
+    private SQLiteConfig sqLiteConfig = new SQLiteConfig();
 
-	/**
-	 * max connetion size.
-	 */
-	private int maxSize = Runtime.getRuntime().availableProcessors();
+    /**
+     * max connetion size.
+     */
+    private int maxConnetionSize = Runtime.getRuntime().availableProcessors();
 
-	/**
-	 * the maximum time in seconds to wait for a free connection.
-	 */
-	private int maxWait = Runtime.getRuntime().availableProcessors();
+    /**
+     * the maximum time in seconds to wait for a free connection.
+     */
+    private int maxWaitTimeout = Runtime.getRuntime().availableProcessors();
 
-	public SQLiteConfig getSqLiteConfig() {
-		return sqLiteConfig;
-	}
+    public SQLiteConfig getSqLiteConfig() {
+        return sqLiteConfig;
+    }
 
-	public void setSqLiteConfig(SQLiteConfig sqLiteConfig) {
-		this.sqLiteConfig = sqLiteConfig;
-	}
+    public void setSqLiteConfig(SQLiteConfig sqLiteConfig) {
+        this.sqLiteConfig = sqLiteConfig;
+    }
 
-	public int getMaxSize() {
-		return maxSize;
-	}
+    public String getDatabaseUrl() {
+        return databaseUrl;
+    }
 
-	public void setMaxSize(int maxSize) {
-		this.maxSize = maxSize;
-	}
+    public void setDatabaseUrl(String databaseUrl) {
+        this.databaseUrl = databaseUrl;
+    }
 
-	public int getMaxWait() {
-		return maxWait;
-	}
+    public String getDatabaseName() {
+        return databaseName;
+    }
 
-	public void setMaxWait(int maxWait) {
-		this.maxWait = maxWait;
-	}
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
+    }
 
-	public String getUrl() {
-		return url;
-	}
+    public int getMaxConnetionSize() {
+        return maxConnetionSize;
+    }
 
-	public void setUrl(String url) {
-		this.url = url;
-	}
+    public void setMaxConnetionSize(int maxConnetionSize) {
+        this.maxConnetionSize = maxConnetionSize;
+    }
 
-	public String getDatabaseName() {
-		return databaseName;
-	}
+    public int getMaxWaitTimeout() {
+        return maxWaitTimeout;
+    }
 
-	public void setDatabaseName(String databaseName) {
-		this.databaseName = databaseName;
-	}
+    public void setMaxWaitTimeout(int maxWaitTimeout) {
+        this.maxWaitTimeout = maxWaitTimeout;
+    }
 
 }
