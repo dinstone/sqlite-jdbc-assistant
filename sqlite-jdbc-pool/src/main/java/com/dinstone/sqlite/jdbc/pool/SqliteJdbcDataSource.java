@@ -32,10 +32,13 @@ public class SqliteJdbcDataSource implements DataSource {
     private ConnectionPoolManager connectionPool;
 
     public SqliteJdbcDataSource(SqliteDataSourceConfig config) {
-        pooledDataSource = new SQLiteConnectionPoolDataSource(config.getSqLiteConfig());
+        pooledDataSource = new SQLiteConnectionPoolDataSource();
+        pooledDataSource.setConfig(config.getSqLiteConfig());
         pooledDataSource.setUrl(config.getDatabaseUrl());
-        connectionPool = new ConnectionPoolManager(pooledDataSource, config.getMaxConnetionSize(),
-                config.getMaxWaitTimeout());
+
+        int maxConnetionSize = config.getMaxConnetionSize();
+        int maxWaitTimeout = config.getMaxWaitTimeout();
+        connectionPool = new ConnectionPoolManager(pooledDataSource, maxConnetionSize, maxWaitTimeout);
     }
 
     @Override
